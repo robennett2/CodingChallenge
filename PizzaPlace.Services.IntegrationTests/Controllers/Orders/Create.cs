@@ -4,7 +4,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace PizzaPlace.Services.IntegrationTests.OrdersControllerCreateTests;
+namespace PizzaPlace.Services.IntegrationTests.Controllers.Orders.Create;
 
 public class Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_the_request_with_that_order : IntegrationTestBase<HttpResponseMessage>
 {

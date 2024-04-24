@@ -1,10 +1,8 @@
 ﻿using System.Net;
-using System.Text;
 using FluentAssertions;
-using Newtonsoft.Json;
 using Xunit;
 
-namespace PizzaPlace.Services.IntegrationTests.OrdersControllerGetTests;
+namespace PizzaPlace.Services.IntegrationTests.Controllers.Orders.Get;
 
 public class Given_an_order_with_an_ID_exists_When_I_make_a_request_to_get_that_order : IntegrationTestBase<HttpResponseMessage>
 {
