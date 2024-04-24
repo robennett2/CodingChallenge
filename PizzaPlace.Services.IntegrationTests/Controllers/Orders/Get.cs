@@ -23,7 +23,7 @@ public class Given_an_order_has_been_created_When_I_make_a_request_to_get_that_o
                     new(2, 3),
                 });
             
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1.0/Orders")
             {
                 Content = JsonContent.Create(createOrderRequest)
             };
@@ -33,7 +33,7 @@ public class Given_an_order_has_been_created_When_I_make_a_request_to_get_that_o
             _orderId = result?.OrderId ?? throw new Exception("Given step failed");
         });
         
-        When(async () => await Client.GetAsync($"/api/v1/Orders/{_orderId}"));
+        When(async () => await Client.GetAsync($"/api/v1.0/Orders/{_orderId}"));
     }
     
     [Fact]
@@ -54,7 +54,7 @@ public class Given_there_is_not_an_order_with_the_given_id_When_I_make_a_request
             _orderId = Guid.NewGuid();
         });
         
-        When(async () => await Client.GetAsync($"/api/v1/Orders/{_orderId}"));
+        When(async () => await Client.GetAsync($"/api/v1.0/Orders/{_orderId}"));
     }
     
     [Fact]

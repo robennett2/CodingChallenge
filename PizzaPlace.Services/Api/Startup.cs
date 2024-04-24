@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Asp.Versioning;
 using FluentValidation;
 using PizzaPlace.Services.Application;
 using PizzaPlace.Services.Application.Infrastructure;
@@ -20,7 +21,8 @@ namespace PizzaPlace.Services
         {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(options => 
+                options.CustomSchemaIds(type => type.ToString().Replace("+", ".")));
             services
                 .AddSingleton<IDataStore, DataStore>()
                 .AddScoped<IOrderService, OrderService>()
@@ -28,6 +30,19 @@ namespace PizzaPlace.Services
                 .AddScoped<IItemRepository, ItemRepository>()
                 .AddScoped<IOrderPriceCalculatorService, OrderPriceCalculatorService>()
                 .AddValidatorsFromAssembly(typeof(Program).Assembly);
+            services
+                .AddApiVersioning(options =>
+                {
+                    options.DefaultApiVersion = new ApiVersion(1);
+                    options.ReportApiVersions = true;
+                    options.AssumeDefaultVersionWhenUnspecified = true;
+                    options.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader());
+                })
+                .AddApiExplorer(options =>
+                {
+                    options.GroupNameFormat = "'v'V";
+                    options.SubstituteApiVersionInUrl = true;
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

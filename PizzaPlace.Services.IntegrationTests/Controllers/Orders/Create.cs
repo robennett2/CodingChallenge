@@ -26,7 +26,7 @@ public class Given_I_have_an_order_When_I_make_the_request_to_create_that_order 
         
         When(async () =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1.0/Orders")
             {
                 Content = JsonContent.Create(_createOrderRequest)
             };
@@ -87,7 +87,7 @@ public class Given_I_have_an_order_that_references_an_item_that_does_not_exist_W
         
         When(async () =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1.0/Orders")
             {
                 Content = JsonContent.Create(_createOrderRequest)
             };
@@ -123,7 +123,7 @@ public class Given_I_have_an_order_that_is_invalid_When_I_make_the_request_to_cr
         
         When(async () =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1.0/Orders")
             {
                 Content = JsonContent.Create(_createOrderRequest)
             };
