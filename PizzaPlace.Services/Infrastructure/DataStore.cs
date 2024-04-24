@@ -25,7 +25,6 @@ public static class DataStore
                 new OrderLine(Items.Single(x => x.ItemId == 2), 2),
             },
             41.50m),
-
         new(
             2,
             "Jane Doe",

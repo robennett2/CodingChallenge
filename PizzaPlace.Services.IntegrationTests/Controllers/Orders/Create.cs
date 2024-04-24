@@ -2,6 +2,7 @@
 using System.Text;
 using FluentAssertions;
 using Newtonsoft.Json;
+using PizzaPlace.Services.Domain.Entities;
 using Xunit;
 
 namespace PizzaPlace.Services.IntegrationTests.Controllers.Orders.Create;
@@ -14,16 +15,15 @@ public class Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_t
     {
         Given(() =>
         {
-            _order = new Order
-            {
-                OrderId = 3,
-                CustomerName = "John Smith",
-                Items = new List<Item>
+            _order = new(
+                1,
+                "John Doe",
+                new List<OrderLine>
                 {
-                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1 },
-                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1 },
-                }
-            };
+                    new(new(1, "Veggie Pizza", 12.50m), 1),
+                    new(new(2, "Pepperoni Pizza", 14.50m), 2),
+                },
+                41.50m);
         });
         
         When(async () =>
@@ -53,17 +53,15 @@ public class Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_
     {
         Given(() =>
         {
-            _order = new Order
-            {
-                OrderId = 3,
-                CustomerName = "",
-                Items = new List<Item>
+            _order = new(
+                3,
+                "",
+                new List<OrderLine>
                 {
-                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1 },
-                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1 },
+                    new(new(1, "Veggie Pizza", 12.50m), 1),
+                    new(new(2, "Pepperoni Pizza", 14.50m), 2),
                 },
-                Total = 28.50m
-            };
+                41.50m);
         });
         
         When(async () =>

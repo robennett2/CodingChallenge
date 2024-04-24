@@ -2,12 +2,20 @@
 
 public class Order
 {
-    public Order(int orderId, string customerName, List<OrderLine> orderLines, decimal expectedTotal)
+    public Order(string customerName, List<OrderLine> orderLines, decimal total)
+    {
+        OrderId = 0;
+        CustomerName = customerName;
+        OrderLines = orderLines;
+        Total = total;
+    }
+    
+    public Order(int orderId, string customerName, List<OrderLine> orderLines, decimal total)
     {
         OrderId = orderId;
         CustomerName = customerName;
         OrderLines = orderLines;
-        ExpectedTotal = expectedTotal;
+        Total = total;
     }
 
     public int OrderId { get; set; }
@@ -16,5 +24,5 @@ public class Order
 
     public IReadOnlyCollection<OrderLine> OrderLines { get; set; }
     
-    public decimal ExpectedTotal { get; set; }
+    public decimal Total { get; set; }
 }

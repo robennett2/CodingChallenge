@@ -9,7 +9,6 @@ namespace PizzaPlace.Services
     [ApiController]
     public class OrdersController(ILogger<OrdersController> logger) : ControllerBase
     {
-        
         [HttpGet]
         [Route("get")]
         public Order Get(int id)
@@ -25,18 +24,18 @@ namespace PizzaPlace.Services
             logger.LogInformation("Creating order for {0}", order.CustomerName);
             
             // calculate the total of the order
-            order.Total = CalculateTotal(order.Items);
+            order.Total = CalculateTotal(order.OrderLines);
             
-            orders.Add(order);
+            DataStore.AddOrder(order);
             return order;
         }
         
-        public static decimal CalculateTotal(List<OrderLine> items)
+        public static decimal CalculateTotal(IReadOnlyCollection<OrderLine> orderLines)
         {
             decimal total = 0;  
-            for (int i =0; i < items.Count; i++)
+            foreach (var orderLine in orderLines)
             {
-                total += items[i].Price * items[i].Quantity;
+                total += orderLine.Item.Price * orderLine.Quantity;
             }
             
             return total;
