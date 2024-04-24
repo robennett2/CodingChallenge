@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using System.Diagnostics;
+using FluentValidation;
+using PizzaPlace.Services.Application;
+using PizzaPlace.Services.Application.Infrastructure;
+using PizzaPlace.Services.Application.Services;
+using PizzaPlace.Services.Infrastructure;
 
 namespace PizzaPlace.Services
 {
@@ -20,6 +21,13 @@ namespace PizzaPlace.Services
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+            services
+                .AddSingleton<IDataStore, DataStore>()
+                .AddScoped<IOrderService, OrderService>()
+                .AddScoped<IOrderRepository, OrderRepository>()
+                .AddScoped<IItemRepository, ItemRepository>()
+                .AddScoped<IOrderPriceCalculatorService, OrderPriceCalculatorService>()
+                .AddValidatorsFromAssembly(typeof(Program).Assembly);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

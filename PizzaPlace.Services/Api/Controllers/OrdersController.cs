@@ -1,97 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
+using PizzaPlace.Services.Application.Services;
+using PizzaPlace.Services.Contracts.Requests;
+using PizzaPlace.Services.Contracts.Responses;
 
 namespace PizzaPlace.Services
 {
     [ApiController]
-    public class OrdersController(ILogger<OrdersController> logger) : ControllerBase
+    [Route("api/v1/{controller}")]
+    public class OrdersController : ControllerBase
     {
-        private List<Item> Menu = new List<Item>
-        {
-            new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 12.50m },
-            new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m },
-            new Item { ItemId = 3, ItemName = "Chicken Pizza", Price = 15.00m },
-            new Item { ItemId = 4, ItemName = "Soda", Price = 2.50m },
-            new Item { ItemId = 5, ItemName = "Caesar Salad", Price = 7.50m },
-            new Item { ItemId = 6, ItemName = "Garlic Bread", Price = 4.50m }
-        };
+        private readonly IOrderService _orderService;
 
-
-        // We have no database, so we'll use a list to store orders
-        // Initialize with some sample data
-        List<Order> orders = new List<Order>
+        public OrdersController(IOrderService orderService)
         {
-            new Order
-            {
-                OrderId = 1, CustomerName = "John Doe", Items = new List<Item>
-                {
-                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 12.50m, Quantity = 1},
-                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 2},
-                },
-                Total = 41.50m
-            },
-            new Order
-            {
-                OrderId = 2, CustomerName = "Jane Doe", Items = new List<Item>
-                {
-                    new Item { ItemId = 3, ItemName = "Chicken Pizza", Price = 15.00m },
-                    new Item { ItemId = 4, ItemName = "Soda", Price = 2.50m },
-                },
-                Total = 17.50m
-            }
-        };
+            _orderService = orderService;
+        }
 
         [HttpGet]
-        [Route("get")]
-        public Order Get(int id)
+        [Route("{id}")]
+        [ProducesResponseType<OrderFound>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetOrder(Guid id, CancellationToken cancellationToken = default)
         {
-            return orders.Single(o => o.OrderId == id);
+            var getOrderResult = await _orderService.GetOrderAsync(id, cancellationToken);
+            return getOrderResult.Match<IActionResult>(
+                order => new OkObjectResult(OrderFound.FromOrder(order)),
+                _ => NotFound());
         }
-
 
         [HttpPost]
-        [Route("create")]
-        public Order Create([FromBody] Order order)
+        [ProducesResponseType<OrderCreated>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrder order, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Creating order for {0}", order.CustomerName);
-            
-            // calculate the total of the order
-            order.Total = CalculateTotal(order.Items);
-            
-            orders.Add(order);
-            return order;
+            var createOrderResult = await _orderService.CreateOrderAsync(order, cancellationToken);
+            return createOrderResult.Match<IActionResult>(
+                orderCreated => new OkObjectResult(OrderCreated.FromOrder(orderCreated)),
+                _ => BadRequest());
         }
-        
-        public static decimal CalculateTotal(List<Item> items)
-        {
-            decimal total = 0;  
-            for (int i =0; i < items.Count; i++)
-            {
-                total += items[i].Price * items[i].Quantity;
-            }
-            
-            return total;
-        }
-        
-    }
-
-    public class Order
-    {
-        public int OrderId { get; set; }
-
-        public string CustomerName { get; set; }
-
-        public List<Item> Items { get; set; }
-
-        public decimal Total { get; set; }
-    }
-
-    public class Item
-    {
-        public int ItemId { get; set; }
-        public string ItemName { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
     }
 }
