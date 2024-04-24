@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using PizzaPlace.Services.Application.Services;
 using PizzaPlace.Services.Contracts.Requests;
 using PizzaPlace.Services.Contracts.Responses;
@@ -6,7 +7,8 @@ using PizzaPlace.Services.Contracts.Responses;
 namespace PizzaPlace.Services
 {
     [ApiController]
-    [Route("api/v1/{controller}")]
+    [ApiVersion("1.0")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
