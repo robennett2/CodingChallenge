@@ -5,11 +5,8 @@ using Xunit;
 
 namespace PizzaPlace.Services.IntegrationTests;
 
-public class OrdersControllerCreateTests
+public class OrdersControllerCreateTests : IntegrationTestBase
 {
-    private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri("http://localhost:5151") };
-
-
     [Fact]
     public async Task Create_Order_ReturnsSuccess1()
     {
@@ -29,7 +26,7 @@ public class OrdersControllerCreateTests
         };
 
         // Act
-        var response = await _client.SendAsync(request);
+        var response = await Client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -55,7 +52,7 @@ public class OrdersControllerCreateTests
         };
 
         // Act
-        var response = await _client.SendAsync(request);
+        var response = await Client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
