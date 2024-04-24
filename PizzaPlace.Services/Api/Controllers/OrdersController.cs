@@ -1,45 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using PizzaPlace.Services.Domain.Entities;
-using PizzaPlace.Services.Infrastructure;
+using PizzaPlace.Services.Application.Services;
+using PizzaPlace.Services.Contracts.Requests;
+using PizzaPlace.Services.Contracts.Responses;
 
 namespace PizzaPlace.Services
 {
     [ApiController]
-    public class OrdersController(ILogger<OrdersController> logger) : ControllerBase
+    [Route("api/v1/{controller}")]
+    public class OrdersController : ControllerBase
     {
-        [HttpGet]
-        [Route("get")]
-        public Order Get(int id)
+        private readonly IOrderService _orderService;
+
+        public OrdersController(IOrderService orderService)
         {
-            return DataStore.Orders.Single(o => o.OrderId == id);
+            _orderService = orderService;
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        [ProducesResponseType<OrderFound>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetOrder(Guid id, CancellationToken cancellationToken = default)
+        {
+            var getOrderResult = await _orderService.GetOrderAsync(id, cancellationToken);
+            return getOrderResult.Match<IActionResult>(
+                order => new OkObjectResult(OrderFound.FromOrder(order)),
+                _ => NotFound());
+        }
 
         [HttpPost]
-        [Route("create")]
-        public Order Create([FromBody] Order order)
+        [ProducesResponseType<OrderCreated>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrder order, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Creating order for {0}", order.CustomerName);
-            
-            // calculate the total of the order
-            order.Total = CalculateTotal(order.OrderLines);
-            
-            DataStore.AddOrder(order);
-            return order;
+            var createOrderResult = await _orderService.CreateOrderAsync(order, cancellationToken);
+            return createOrderResult.Match<IActionResult>(
+                orderCreated => new OkObjectResult(OrderCreated.FromOrder(orderCreated)),
+                _ => BadRequest());
         }
-        
-        public static decimal CalculateTotal(IReadOnlyCollection<OrderLine> orderLines)
-        {
-            decimal total = 0;  
-            foreach (var orderLine in orderLines)
-            {
-                total += orderLine.Item.Price * orderLine.Quantity;
-            }
-            
-            return total;
-        }
-        
     }
 }

@@ -1,37 +1,34 @@
 ﻿using System.Net;
-using System.Text;
+using System.Net.Http.Json;
 using FluentAssertions;
-using Newtonsoft.Json;
-using PizzaPlace.Services.Domain.Entities;
+using PizzaPlace.Services.Contracts.Requests;
+using PizzaPlace.Services.Contracts.Responses;
 using Xunit;
 
 namespace PizzaPlace.Services.IntegrationTests.Controllers.Orders.Create;
 
-public class Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_the_request_with_that_order : IntegrationTestBase<HttpResponseMessage>
+public class Given_I_have_an_order_When_I_make_the_request_to_create_that_order : IntegrationTestBase<HttpResponseMessage>
 {
-    private Order _order = null!;
+    private CreateOrder _createOrderRequest = null!;
 
-    public Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_the_request_with_that_order()
+    public Given_I_have_an_order_When_I_make_the_request_to_create_that_order()
     {
         Given(() =>
         {
-            _order = new(
-                1,
-                "John Doe",
-                new List<OrderLine>
+            _createOrderRequest = new(
+                "Customer", 
+                new List<CreateOrder.OrderLine>
                 {
-                    new(new(1, "Veggie Pizza", 12.50m), 1),
-                    new(new(2, "Pepperoni Pizza", 14.50m), 2),
-                },
-                41.50m);
+                    new(1, 2),
+                    new(2, 3),
+                });
         });
         
         When(async () =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
             {
-                Content = new StringContent(
-                    JsonConvert.SerializeObject(_order), Encoding.UTF8, "application/json")
+                Content = JsonContent.Create(_createOrderRequest)
             };
             
             return await Client.SendAsync(request);
@@ -42,34 +39,57 @@ public class Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_t
     public void Then_an_OK_status_code_returned()
     {
         Result.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Then_the_created_order_is_returned()
+    {
+        var body = await Result.Content.ReadFromJsonAsync<OrderCreated>();
+        body.Should().BeEquivalentTo(new
+        {
+            OrderId = new { },
+            OrderLines = new[]
+            {
+                new
+                {
+                    ItemId = 1,
+                    ItemName = "Veggie Pizza",
+                    Quantity = 2
+                },
+                new
+                {
+                    ItemId = 2,
+                    ItemName = "Pepperoni Pizza",
+                    Quantity = 3
+                }
+            },
+            OrderTotal = (2 * 12.50m) + (3 * 14.50m)
+        });
     }
 }
 
-public class Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_request_with_that_order : IntegrationTestBase<HttpResponseMessage>
+public class Given_I_have_an_order_that_references_an_item_that_does_not_exist_When_I_make_the_request_to_create_that_order : IntegrationTestBase<HttpResponseMessage>
 {
-    private Order _order = null!;
+    private CreateOrder _createOrderRequest = null!;
 
-    public Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_request_with_that_order()
+    public Given_I_have_an_order_that_references_an_item_that_does_not_exist_When_I_make_the_request_to_create_that_order()
     {
         Given(() =>
         {
-            _order = new(
-                3,
-                "",
-                new List<OrderLine>
+            _createOrderRequest = new(
+                "Customer", 
+                new List<CreateOrder.OrderLine>
                 {
-                    new(new(1, "Veggie Pizza", 12.50m), 1),
-                    new(new(2, "Pepperoni Pizza", 14.50m), 2),
-                },
-                41.50m);
+                    new(1, 2),
+                    new(-12, 3),
+                });
         });
         
         When(async () =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
             {
-                Content = new StringContent(
-                    JsonConvert.SerializeObject(_order), Encoding.UTF8, "application/json")
+                Content = JsonContent.Create(_createOrderRequest)
             };
             
             return await Client.SendAsync(request);
@@ -77,8 +97,44 @@ public class Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_
     }
     
     [Fact]
-    public void Then_an_OK_status_code_returned()
+    public void Then_an_BadRequest_status_code_returned()
     {
-        Result.StatusCode.Should().Be(HttpStatusCode.OK);
+        Result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+}
+
+
+public class Given_I_have_an_order_that_is_invalid_When_I_make_the_request_to_create_that_order : IntegrationTestBase<HttpResponseMessage>
+{
+    private CreateOrder _createOrderRequest = null!;
+
+    public Given_I_have_an_order_that_is_invalid_When_I_make_the_request_to_create_that_order()
+    {
+        Given(() =>
+        {
+            _createOrderRequest = new(
+                "Customer", 
+                new List<CreateOrder.OrderLine>
+                {
+                    new(1, 2),
+                    new(2, -3),
+                });
+        });
+        
+        When(async () =>
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Orders")
+            {
+                Content = JsonContent.Create(_createOrderRequest)
+            };
+            
+            return await Client.SendAsync(request);
+        });
+    }
+    
+    [Fact]
+    public void Then_an_BadRequest_status_code_returned()
+    {
+        Result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }

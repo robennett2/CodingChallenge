@@ -2,16 +2,16 @@
 
 public class Item
 {
-    public Item(int itemId, string itemName, decimal price)
+    public Item(int id, string name, decimal price)
     {
-        ItemId = itemId;
-        ItemName = itemName;
+        Id = id;
+        Name = name;
         Price = price;
     }
     
-    public int ItemId { get; private set; }
+    public int Id { get; private set; }
     
-    public string ItemName { get; private set; }
+    public string Name { get; private set; }
 
     public decimal Price { get; }
 }

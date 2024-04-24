@@ -4,21 +4,21 @@ public class Order
 {
     public Order(string customerName, List<OrderLine> orderLines, decimal total)
     {
-        OrderId = 0;
+        Id = Guid.NewGuid();
         CustomerName = customerName;
         OrderLines = orderLines;
         Total = total;
     }
     
-    public Order(int orderId, string customerName, List<OrderLine> orderLines, decimal total)
+    public Order(Guid id, string customerName, List<OrderLine> orderLines, decimal total)
     {
-        OrderId = orderId;
+        Id = id;
         CustomerName = customerName;
         OrderLines = orderLines;
         Total = total;
     }
 
-    public int OrderId { get; set; }
+    public Guid Id { get; set; }
 
     public string CustomerName { get; set; }
 

@@ -2,9 +2,20 @@
 
 namespace PizzaPlace.Services.Infrastructure;
 
-public static class DataStore
+public interface IDataStore
 {
-    public static IReadOnlyCollection<Item> Items { get; private set; } = new List<Item>
+    IReadOnlyCollection<Item> Items { get; }
+
+    IReadOnlyCollection<Order> Orders { get; }
+    
+    void AddOrder(Order order);
+}
+
+public class DataStore : IDataStore
+{
+    private readonly List<Order> _orders;
+    
+    public IReadOnlyCollection<Item> Items { get; private set; } = new List<Item>
     {
         new (1, "Veggie Pizza", 12.50m),
         new (2, "Pepperoni Pizza", 14.50m),
@@ -14,29 +25,32 @@ public static class DataStore
         new (6, "Garlic Bread", 4.50m)
     };
 
-    private static readonly List<Order> _orders =
-    [
-        new(
-            1,
-            "John Doe",
-            new List<OrderLine>
+    public IReadOnlyCollection<Order> Orders => _orders;
+
+    public DataStore()
+    {
+        _orders =
+        [
+            new(
+            Guid.NewGuid(),
+        "John Doe",
+        new List<OrderLine>
             {
-                new OrderLine(Items.Single(x => x.ItemId == 1), 1),
-                new OrderLine(Items.Single(x => x.ItemId == 2), 2),
+                new OrderLine(Items.Single(x => x.Id == 1), 1),
+                new OrderLine(Items.Single(x => x.Id == 2), 2),
             },
-            41.50m),
+        41.50m),
         new(
-            2,
+            Guid.NewGuid(),
             "Jane Doe",
             new List<OrderLine>
             {
-                new OrderLine(Items.Single(x => x.ItemId == 3), 1),
-                new OrderLine(Items.Single(x => x.ItemId == 4), 2),
+                new OrderLine(Items.Single(x => x.Id == 3), 1),
+                new OrderLine(Items.Single(x => x.Id == 4), 2),
             },
             41.50m)
-    ];
-
-    public static void AddOrder(Order order) => _orders.Add(order);
-
-    public static IReadOnlyCollection<Order> Orders => _orders;
+        ];
+    }
+    
+    public void AddOrder(Order order) => _orders.Add(order);
 }
