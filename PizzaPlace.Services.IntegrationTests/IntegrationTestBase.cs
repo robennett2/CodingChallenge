@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Chill;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace PizzaPlace.Services.IntegrationTests;
 
-public abstract class IntegrationTestBase
+public abstract class IntegrationTestBase<TResult> : GivenWhenThen<TResult>
 {
     private readonly WebApplicationFactory<Program> _webApplicationFactory = new();
     

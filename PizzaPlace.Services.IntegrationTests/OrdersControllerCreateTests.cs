@@ -1,62 +1,86 @@
 ﻿using System.Net;
 using System.Text;
+using FluentAssertions;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace PizzaPlace.Services.IntegrationTests;
+namespace PizzaPlace.Services.IntegrationTests.OrdersControllerCreateTests;
 
-public class OrdersControllerCreateTests : IntegrationTestBase
+public class Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_the_request_with_that_order : IntegrationTestBase<HttpResponseMessage>
 {
-    [Fact]
-    public async Task Create_Order_ReturnsSuccess1()
+    private Order _order = null!;
+
+    public Given_I_have_an_order_without_a_total_And_it_is_valid_When_I_make_the_request_with_that_order()
     {
-        // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+        Given(() =>
         {
-            Content = new StringContent(JsonConvert.SerializeObject(new Order
+            _order = new Order
             {
                 OrderId = 3,
                 CustomerName = "John Smith",
                 Items = new List<Item>
                 {
-                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1},
-                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1},
+                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1 },
+                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1 },
                 }
-            }), Encoding.UTF8, "application/json")
-        };
-
-        // Act
-        var response = await Client.SendAsync(request);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task Create_Order_ReturnsSuccess2()
-    {
-        // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+            };
+        });
+        
+        When(async () =>
         {
-            Content = new StringContent(JsonConvert.SerializeObject(new Order
+            var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+            {
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(_order), Encoding.UTF8, "application/json")
+            };
+            
+            return await Client.SendAsync(request);
+        });
+    }
+    
+    [Fact]
+    public void Then_an_OK_status_code_returned()
+    {
+        Result.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+}
+
+public class Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_request_with_that_order : IntegrationTestBase<HttpResponseMessage>
+{
+    private Order _order = null!;
+
+    public Given_I_have_an_order_with_a_total_And_it_is_valid_When_I_make_the_request_with_that_order()
+    {
+        Given(() =>
+        {
+            _order = new Order
             {
                 OrderId = 3,
                 CustomerName = "",
                 Items = new List<Item>
                 {
-                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1},
-                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1},
+                    new Item { ItemId = 1, ItemName = "Veggie Pizza", Price = 10.00m, Quantity = 1 },
+                    new Item { ItemId = 2, ItemName = "Pepperoni Pizza", Price = 14.50m, Quantity = 1 },
                 },
                 Total = 28.50m
-            }), Encoding.UTF8, "application/json")
-        };
-
-        // Act
-        var response = await Client.SendAsync(request);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            };
+        });
+        
+        When(async () =>
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "/create")
+            {
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(_order), Encoding.UTF8, "application/json")
+            };
+            
+            return await Client.SendAsync(request);
+        });
     }
-
     
+    [Fact]
+    public void Then_an_OK_status_code_returned()
+    {
+        Result.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
 }
